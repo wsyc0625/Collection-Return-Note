@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raduga Note - Final Layout</title>
+    <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.1.7/dist/signature_pad.umd.min.js"></script>
+    <style>
+        :root { --primary: #000; }
+        * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        
+        @page { size: A4; margin: 0; }
+
+        body { 
+            background: #f1f5f9; 
+            margin: 0; padding: 20px 0; 
+            display: flex; flex-direction: column; align-items: center; 
+            font-family: "Arial", sans-serif; 
+        }
+
+        .page {
+            background: white;
+            width: 210mm;
+            height: 296mm;
+            padding: 20mm 25mm;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        header { margin-bottom: 50px; display: flex; justify-content: space-between; align-items: flex-end; }
+        h1 { margin: 0; font-size: 26pt; font-weight: bold; letter-spacing: 1px; }
+        .date-box { font-size: 11pt; font-weight: bold; }
+
+        /* Info Section */
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; margin-bottom: 30px; }
+        .info-item { display: flex; flex-direction: column; }
+        label { font-size: 8.5pt; font-weight: bold; text-transform: uppercase; margin-bottom: 8px; color: #555; }
+        .input-field { border: none; font-size: 12pt; padding: 5px 0; outline: none; font-family: inherit; }
+        .company-name { font-size: 13pt; font-weight: bold; padding: 5px 0; }
+
+        /* Item List - 55/45 Split & Left Aligned */
+        .item-section { margin-top: 20px; }
+        .item-header { 
+            display: grid; 
+            grid-template-columns: 55% 45%; 
+            font-weight: bold; 
+            font-size: 9pt; 
+            padding-bottom: 10px; 
+            border-bottom: 1.5px solid #000; 
+        }
+        .item-row { 
+            display: grid; 
+            grid-template-columns: 55% 45%; 
+            padding: 15px 0;
+            align-items: start;
+        }
+        
+        .item-row textarea {
+            border: none;
+            outline: none;
+            font-size: 11pt;
+            font-family: inherit;
+            width: 95%;
+            resize: none;
+            overflow: hidden;
+            background: transparent;
+            line-height: 1.4;
+        }
+
+        .item-row input { 
+            border: none; 
+            outline: none; 
+            font-size: 11pt; 
+            font-family: inherit; 
+            width: 100%; 
+            text-align: left; /* IMEI 标题和内容全部左对齐 */
+            background: transparent;
+        }
+
+        /* Remark - Double Space Downwards */
+        .remark-section { 
+            margin-top: auto; 
+            margin-bottom: 5mm; 
+        }
+        .remark-line { 
+            width: 100%; 
+            border: none; 
+            border-bottom: 1.5px solid #000; 
+            font-size: 12pt; 
+            padding: 60px 0 10px 0; 
+            outline: none; 
+            font-family: inherit;
+        }
+
+        /* Compact Signature Area */
+        .footer-signatures { padding-bottom: 5mm; }
+        .signature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; }
+        .sig-box { text-align: center; }
+        .canvas-wrap { border-bottom: 1.5px solid #000; margin-bottom: 8px; height: 80px; position: relative; }
+        canvas { width: 100%; height: 80px; touch-action: none; }
+        .sig-img { display: none; width: 100%; height: 80px; object-fit: contain; }
+        .sig-label { font-size: 9pt; font-weight: bold; text-transform: uppercase; color: #333; }
+
+        /* Buttons */
+        .controls { width: 210mm; margin-bottom: 15px; display: flex; gap: 10px; }
+        button { padding: 12px 20px; border-radius: 4px; border: none; cursor: pointer; font-weight: bold; }
+        .btn-switch { background: #475569; color: white; }
+        .btn-print { background: #2563eb; color: white; flex-grow: 1; }
+        .btn-add { background: #eee; color: #444; font-size: 8pt; margin-top: 10px; border: 1px dashed #ccc; }
+        .btn-clear { background: none; color: #999; font-size: 7pt; margin-top: 3px; }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .no-print { display: none !important; }
+            .page { box-shadow: none; border: none; margin: 0; }
+            canvas { display: none !important; }
+            .sig-img { display: block !important; }
+            input::placeholder, textarea::placeholder { color: transparent; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="controls no-print">
+    <button class="btn-switch" onclick="toggleMode()" id="modeBtn">Return Note</button>
+    <button class="btn-print" onclick="prepareAndPrint()">PRINT / SAVE AS PDF</button>
+</div>
+
+<div class="page">
+    <header>
+        <h1 id="title">COLLECTION NOTE</h1>
+        <div class="date-box" id="dateText">Date: 22 April 2026</div>
+    </header>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <label>Customer Name</label>
+            <input type="text" class="input-field" placeholder="...">
+        </div>
+        <div class="info-item">
+            <label>Company</label>
+            <div class="company-name">Raduga Pte Ltd</div>
+        </div>
+    </div>
+
+    <div class="info-item" style="margin-bottom: 40px;">
+        <label>Address</label>
+        <input type="text" class="input-field" placeholder="...">
+    </div>
+
+    <div class="item-section">
+        <div class="item-header">
+            <div>SKU</div>
+            <div>IMEI / SERIAL NUMBER</div>
+        </div>
+        <div id="itemBody">
+            <div class="item-row">
+                <textarea rows="1" placeholder="Type SKU..." oninput="autoResize(this)"></textarea>
+                <input type="text" placeholder="Enter IMEI / SN">
+            </div>
+        </div>
+        <button class="btn-add no-print" id="addBtn" onclick="addItem()">+ Add SKU Row</button>
+    </div>
+
+    <div class="remark-section">
+        <label>Remarks</label>
+        <input type="text" class="remark-line">
+    </div>
+
+    <div class="footer-signatures">
+        <div class="signature-grid" id="collectionSigs">
+            <div class="sig-box">
+                <div class="canvas-wrap">
+                    <canvas id="sig-it"></canvas>
+                    <img id="img-it" class="sig-img">
+                </div>
+                <div class="sig-label">Issued By (IT Department)</div>
+                <button class="btn-clear no-print" onclick="clearSig('sig-it')">Clear</button>
+            </div>
+            <div class="sig-box">
+                <div class="canvas-wrap">
+                    <canvas id="sig-driver"></canvas>
+                    <img id="img-driver" class="sig-img">
+                </div>
+                <div class="sig-label">Acknowledged By (Driver)</div>
+                <button class="btn-clear no-print" onclick="clearSig('sig-driver')">Clear</button>
+            </div>
+        </div>
+
+        <div class="signature-grid" id="returnSigs" style="display: none;">
+            <div></div>
+            <div class="sig-box">
+                <div class="canvas-wrap">
+                    <canvas id="sig-cust"></canvas>
+                    <img id="img-cust" class="sig-img">
+                </div>
+                <div class="sig-label">Customer Signature</div>
+                <button class="btn-clear no-print" onclick="clearSig('sig-cust')">Clear</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let mode = 'collection';
+    let rowCount = 1;
+    const pads = {};
+
+    function initPads() {
+        ['sig-it', 'sig-driver', 'sig-cust'].forEach(id => {
+            const canvas = document.getElementById(id);
+            const ratio = 2;
+            canvas.width = canvas.offsetWidth * ratio;
+            canvas.height = canvas.offsetHeight * ratio;
+            canvas.getContext("2d").scale(ratio, ratio);
+            pads[id] = new SignaturePad(canvas);
+        });
+    }
+
+    function autoResize(textarea) {
+        textarea.style.height = 'auto';
+        textarea.style.height = textarea.scrollHeight + 'px';
+    }
+
+    function toggleMode() {
+        const btn = document.getElementById('modeBtn');
+        const title = document.getElementById('title');
+        if (mode === 'collection') {
+            mode = 'return';
+            title.innerText = 'RETURN NOTE';
+            document.getElementById('collectionSigs').style.display = 'none';
+            document.getElementById('returnSigs').style.display = 'grid';
+            btn.innerText = 'Collection Note';
+        } else {
+            mode = 'collection';
+            title.innerText = 'COLLECTION NOTE';
+            document.getElementById('collectionSigs').style.display = 'grid';
+            document.getElementById('returnSigs').style.display = 'none';
+            btn.innerText = 'Return Note';
+        }
+    }
+
+    function addItem() {
+        if (rowCount < 3) {
+            const body = document.getElementById('itemBody');
+            const div = document.createElement('div');
+            div.className = 'item-row';
+            div.innerHTML = '<textarea rows="1" placeholder="..." oninput="autoResize(this)"></textarea> <input type="text" placeholder="...">';
+            body.appendChild(div);
+            rowCount++;
+            if (rowCount === 3) document.getElementById('addBtn').style.display = 'none';
+        }
+    }
+
+    function clearSig(id) { pads[id].clear(); }
+
+    function prepareAndPrint() {
+        const ids = mode === 'collection' ? ['sig-it', 'sig-driver'] : ['sig-cust'];
+        ids.forEach(id => {
+            if (!pads[id].isEmpty()) {
+                const dataUrl = pads[id].toDataURL();
+                const img = document.getElementById(id.replace('sig-', 'img-'));
+                img.src = dataUrl;
+            }
+        });
+        window.print();
+    }
+
+    document.getElementById('dateText').innerText = 'Date: ' + new Date().toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'long', year: 'numeric'
+    });
+
+    window.onload = () => setTimeout(initPads, 300);
+</script>
+</body>
+</html>
