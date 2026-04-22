@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RD Collection Return Note</title>
+    <style>
+        :root { --line-color: #000; --text-main: #1a1a1a; --text-muted: #555; }
+        * { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        
+        @page { size: A4; margin: 0; }
+
+        body { 
+            background: #f1f5f9; 
+            margin: 0; padding: 10px 0; 
+            display: flex; flex-direction: column; align-items: center; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--text-main);
+        }
+
+        .page {
+            background: white;
+            width: 95%;
+            max-width: 210mm;
+            min-height: 296mm;
+            padding: 15mm 10mm;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+        }
+
+        @media (min-width: 768px) {
+            .page { padding: 20mm 20mm; width: 210mm; }
+        }
+
+        header { 
+            margin-bottom: 25px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: flex-end; 
+            border-bottom: 2px solid var(--line-color);
+            padding-bottom: 10px;
+        }
+        h1 { margin: 0; font-size: 18pt; font-weight: 900; }
+        .date-box { font-size: 10pt; font-weight: bold; }
+
+        .info-grid { display: grid; grid-template-columns: 1fr; gap: 15px; margin-bottom: 20px; }
+        @media (min-width: 600px) {
+            .info-grid { grid-template-columns: 1.2fr 0.8fr; gap: 40px; }
+            h1 { font-size: 22pt; }
+        }
+
+        .info-item { display: flex; flex-direction: column; }
+        label { font-size: 8pt; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; color: var(--text-muted); }
+        .input-field { border: none; font-size: 12pt; padding: 10px 0; outline: none; border-bottom: 1px solid #ddd; background: transparent; width: 100%; border-radius: 0; }
+
+        .item-section { margin-top: 10px; flex-grow: 1; }
+        .section-title { font-size: 10pt; font-weight: 900; margin-bottom: 10px; }
+        
+        .item-header { 
+            display: grid; grid-template-columns: 1fr 1fr; 
+            font-weight: 800; font-size: 8.5pt; padding: 8px 5px; 
+            background: #f8fafc; border-top: 1.5px solid var(--line-color); border-bottom: 1px solid var(--line-color);
+        }
+        .item-row { 
+            display: grid; grid-template-columns: 1fr 1fr; 
+            padding: 0; border-bottom: 1px solid #eee;
+            align-items: stretch;
+        }
+        
+        .item-row textarea { 
+            border: none; outline: none; font-size: 11pt; padding: 12px 8px;
+            font-family: inherit; resize: none; overflow: hidden;
+            word-break: break-all; min-height: 45px;
+        }
+        .item-row textarea:first-child { border-right: 1px solid #eee; }
+
+        .bottom-container { margin-top: 30px; }
+        .remark-area { width: 100%; min-height: 60px; border: none; border-bottom: 1.5px solid var(--line-color); font-size: 11pt; padding: 30px 0 10px 0; outline: none; resize: none; background: transparent; }
+
+        .signature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 40px; }
+        @media (min-width: 600px) { .signature-grid { gap: 60px; } }
+
+        .sig-box { text-align: left; }
+        .sig-space { height: 60px; border-bottom: 1.5px solid var(--line-color); margin-bottom: 8px; }
+        .sig-label { font-size: 9pt; font-weight: 800; text-transform: uppercase; }
+
+        .controls { width: 95%; max-width: 210mm; margin-bottom: 15px; display: flex; flex-direction: column; gap: 8px; }
+        @media (min-width: 600px) { .controls { flex-direction: row; } }
+
+        .btn { padding: 14px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; font-size: 10pt; }
+        .btn-mode { background: #475569; color: white; flex: 1; }
+        .btn-mode.active { background: #000; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .btn-print { background: #2563eb; color: white; flex: 1.5; }
+        .btn-add { background: #fff; color: #64748b; margin-top: 10px; border: 1px dashed #cbd5e1; width: 100%; }
+
+        @media print {
+            body { background: white; padding: 0; }
+            .no-print { display: none !important; }
+            .page { box-shadow: none; border: none; margin: 0; width: 100%; padding: 15mm 20mm; }
+            .item-row { border-bottom: 1px solid transparent !important; }
+            .has-content { border-bottom: 1px solid #000 !important; }
+            .input-field { border-bottom: 1px solid #000 !important; }
+            .sig-space { border-bottom: 1.5px solid #000 !important; }
+            textarea::placeholder { color: transparent !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="controls no-print">
+    <div style="display: flex; gap: 8px; flex: 1;">
+        <button class="btn btn-mode active" id="coll-btn" onclick="setMode('collection')">Collection Note</button>
+        <button class="btn btn-mode" id="ret-btn" onclick="setMode('return')">Return Note</button>
+    </div>
+    <button class="btn btn-print" onclick="window.print()">PRINT / DOWNLOAD PDF</button>
+</div>
+
+<div class="page">
+    <header>
+        <h1 id="page-title">COLLECTION NOTE</h1>
+        <div class="date-box" id="dateText">Date: --</div>
+    </header>
+
+    <div class="info-grid">
+        <div class="info-item">
+            <label>Customer Name</label>
+            <input type="text" class="input-field" placeholder="Click to type...">
+        </div>
+        <div class="info-item">
+            <label>Company</label>
+            <div style="font-size: 13pt; font-weight: 900; padding: 8px 0;">Raduga Pte Ltd</div>
+        </div>
+    </div>
+
+    <div class="info-item" style="margin-bottom: 20px;">
+        <label>Address</label>
+        <input type="text" class="input-field" placeholder="Enter full address">
+    </div>
+
+    <div class="item-section">
+        <div class="section-title">ITEM LIST</div>
+        <div class="item-header">
+            <div>SKU / DESCRIPTION</div>
+            <div>IMEI / SERIAL NO.</div>
+        </div>
+        <div id="itemBody">
+            <div class="item-row">
+                <textarea rows="1" placeholder="SKU info..." oninput="handleInput(this)"></textarea>
+                <textarea rows="1" placeholder="IMEI info..." oninput="handleInput(this)"></textarea>
+            </div>
+        </div>
+        <button class="btn btn-add no-print" onclick="addItem()">+ Add Item Row</button>
+    </div>
+
+    <div class="bottom-container">
+        <div class="remark-section">
+            <label>REMARKS</label>
+            <textarea class="remark-area" placeholder="Enter notes..."></textarea>
+        </div>
+
+        <div class="signature-grid">
+            <div class="sig-box" id="sig-box-it">
+                <div class="sig-space"></div>
+                <div class="sig-label">Authorized IT Dept</div>
+            </div>
+            <div class="sig-box">
+                <div class="sig-space"></div>
+                <div class="sig-label" id="sig-label-text">Collected By</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function handleInput(el) {
+        el.style.height = 'auto';
+        el.style.height = el.scrollHeight + 'px';
+        
+        const row = el.closest('.item-row');
+        const textareas = row.querySelectorAll('textarea');
+        let hasValue = false;
+        textareas.forEach(t => { if(t.value.trim() !== '') hasValue = true; });
+        
+        if(hasValue) row.classList.add('has-content');
+        else row.classList.remove('has-content');
+    }
+
+    function setMode(mode) {
+        const title = document.getElementById('page-title');
+        const labelText = document.getElementById('sig-label-text');
+        const itBox = document.getElementById('sig-box-it');
+        
+        document.getElementById('coll-btn').classList.toggle('active', mode === 'collection');
+        document.getElementById('ret-btn').classList.toggle('active', mode === 'return');
+
+        if (mode === 'collection') {
+            title.innerText = 'COLLECTION NOTE';
+            labelText.innerText = 'Collected By';
+            itBox.style.visibility = 'visible';
+        } else {
+            title.innerText = 'RETURN NOTE';
+            labelText.innerText = 'Customer Signature';
+            itBox.style.visibility = 'hidden';
+        }
+    }
+
+    function addItem() {
+        const div = document.createElement('div');
+        div.className = 'item-row';
+        div.innerHTML = `
+            <textarea rows="1" oninput="handleInput(this)"></textarea>
+            <textarea rows="1" oninput="handleInput(this)"></textarea>
+        `;
+        document.getElementById('itemBody').appendChild(div);
+    }
+
+    document.getElementById('dateText').innerText = 'Date: ' + new Date().toLocaleDateString('en-GB', {
+        day: 'numeric', month: 'long', year: 'numeric'
+    });
+</script>
+</body>
+</html>
